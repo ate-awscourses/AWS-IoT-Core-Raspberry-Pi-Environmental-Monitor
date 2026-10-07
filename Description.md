@@ -24,9 +24,10 @@ This is almost identical to how real IoT devices work in production.
 
 Examples:
 
-Smart thermostats
-Parking kiosks
-Smart vending machines
-Industrial sensors
-Security cameras
-Parcel lockers
+Smart thermostats,
+Parking kiosks,
+Smart vending machines,
+Industrial sensors,
+Security cameras,
+Parcel lockers,
+etc.
