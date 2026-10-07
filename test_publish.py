@@ -1,5 +1,5 @@
-#test_publish.py
-#Built an AWS IoT monitoring solution using Raspberry Pi 5, Python, MQTT, and AWS IoT Core. Implemented certificate-based device authentication and published real-time system telemetry including CPU, memory, and disk utilization to AWS.
+# Built an AWS IoT monitoring solution using Raspberry Pi 5, Python, MQTT, and AWS IoT Core. 
+# Implemented certificate-based device authentication and published real-time system telemetry including CPU, memory, and disk utilization to AWS.
 
 import json
 import time
