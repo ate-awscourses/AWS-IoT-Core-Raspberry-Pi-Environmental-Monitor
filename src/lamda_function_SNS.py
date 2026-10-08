@@ -1,3 +1,6 @@
+# Insert this script on Lambda -> Code -> Deploy
+# Then test with JSON from step 20 on documentation.md
+
 import boto3
 
 cloudwatch = boto3.client('cloudwatch')
