@@ -289,5 +289,130 @@ Add - Line Graph
 Select - DiskUsage
 Title - Raspberry Pi Disk Utilization
 
+# Step 20 - Create SNS Topic
+Search:
+SNS
+
+Open:
+Simple Notification Service
+
+Navigate:
+Topics -> Create Topic
+
+Choose:
+Standard
+
+Name:
+PiAlerts
+
+Click:
+Create Topic
+
+# Step 21 - Create Email Subscription
+Inside:
+PiAlerts
+
+Click:
+Create Subscription
+
+Protocol: 
+Email
+
+Endpoint:
+your_email@example.com
+
+Click:
+Create Subscription
+
+# Step 22 - Confirm Subscription
+Check your email
+
+# Step 23 - Copy the SNS Topic ARN
+Inside:
+PiAlerts
+
+Copy:
+Topic ARN
+arn:aws:sns:us-east-2:874841217397:PiAlerts:902530d1-07ce-4892-9e07-9667ce975591
+
+# Step 24 - Update Lambda Function
+Lambda -> PiMetricsToCloudWatch
+
+Replace cold with:
+import boto3
+
+cloudwatch = boto3.client('cloudwatch')
+sns = boto3.client('sns')
+
+TOPIC_ARN = "arn:aws:sns:us-east-2:874841217397:PiAlerts"
+
+def lambda_handler(event, context):
+
+    cpu = float(event['cpu'])
+    memory = float(event['memory'])
+    disk = float(event['disk'])
+
+    cloudwatch.put_metric_data(
+        Namespace='PiMonitor',
+        MetricData=[
+            {
+                'MetricName': 'CPUUsage',
+                'Value': cpu,
+                'Unit': 'Percent'
+            },
+            {
+                'MetricName': 'MemoryUsage',
+                'Value': memory,
+                'Unit': 'Percent'
+            },
+            {
+                'MetricName': 'DiskUsage',
+                'Value': disk,
+                'Unit': 'Percent'
+            }
+        ]
+    )
+
+    if cpu > 80:
+        sns.publish(
+            TopicArn=TOPIC_ARN,
+            Subject="Raspberry Pi CPU Alert",
+            Message=f"CPU usage exceeded threshold: {cpu}%"
+        )
+
+    return {
+        'statusCode': 200
+    }
+
+Click:
+Deploy
+
+# Step 25 - Grant Lambda Permission to Send SNS
+Go to:
+Lambda -> Configuration -> Permissions
+
+Open the execution role.
+
+Attach & save:
+AmazonSNSFullAccess
+
+# Step 26 - Test the Alert
+Inside Lambda:
+Test
+
+Use JSON to execute the test:
+{
+"cpu": 95,
+"memory": 30,
+"disk": 20
+}
+
+# Step 27 - SNS Alert
+You will now receive an SNS alert either by email or phone based on preference.
+
+
+
+    
+
 
 
