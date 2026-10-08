@@ -143,11 +143,151 @@ FROM 'home/pi/metrics'
 Send data to:
 CloudWatch
 
-# Step 11 - Add SNS Alerts
-Create SNS Topic
-pi-alerts
-Subscribe your email
+# Step 11 - Create a Lambda Function
+Search AWS:
+Lambda
 
-Lambda logic:
-IF CPU > 50%
-Send Email Alert
+Click:
+Create Function
+
+Choose:
+Author from scratch
+
+Function Name:
+PiMetricsToCloudWatch
+
+Runtime:
+Python 3.13
+
+Click:
+Create Function
+
+# Step 12 - Give Lambda Permission to Write CloudWatch
+Open:
+Configuration -> Permissions
+
+Click:
+Lambda execution role
+
+Click:
+Add permissions -> attach policies
+
+Search and attach:
+CloudWatchFullAccess
+
+# Step 13 - Add Lambda Core
+Replace the default Lambda code with:
+Lambda -> Functions -> PiMetricsToCloudWatch
+
+import json
+import boto3
+ 
+cloudwatch = boto3.client('cloudwatch')
+ 
+def lambda_handler(event, context):
+ 
+cloudwatch.put_metric_data(
+Namespace='PiMonitor',
+MetricData=[
+{
+'MetricName': 'CPUUsage',
+'Value': float(event['cpu']),
+'Unit': 'Percent'
+},
+{
+'MetricName': 'MemoryUsage',
+'Value': float(event['memory']),
+'Unit': 'Percent'
+},
+{
+'MetricName': 'DiskUsage',
+'Value': float(event['disk']),
+'Unit': 'Percent'
+}
+]
+)
+ 
+return {
+'statusCode': 200
+}
+
+Then click:
+Deploy
+
+You should see:
+Successfully updated function
+
+Test Lambda:
+Click Test
+
+Use this JSON:
+{
+  "cpu": 25,
+  "memory": 40,
+  "disk": 15
+}
+
+Save it and click:
+Test
+
+Results:
+statusCode 200
+
+# Step 15 - Connect AWS IoT Rule to Lambda
+AWS IoT Core -> Message Routing -> Rules
+
+Add Another Action:
+Actions -> Add Action -> Lambda -> Choose your function you created
+
+# Step 16 - Start Sending Telemetry
+On your Pi:
+source venv/bin/activate
+cd ~/projects/aws-iot-monitor
+python3 monitor.py
+
+# Step 17 - Verify Lambda Executions
+Lambda -> PiMetricsToCloudWatch -> Monitor
+Check for -> Invovations
+
+# Step 18 - Verify CloudWatch Metrics
+Navigate:
+CloudWatch -> Metrics
+
+Click:
+All metrics
+
+Then:
+Custom Namespaces
+
+You should see:
+PiMonitor
+
+Click it and you should see:
+CPUUsage
+MemoryUsage
+DiskUsage
+
+# Step 19 - Create a Dashboard
+Navigate:
+CloudWatch -> Dashboards -> Create dashboards
+
+Name:
+PiMonitorDashboards
+
+Widget 1:
+Add - Line Graph
+Select - CPUUsage
+Title - Raspberry Pi CPU Utilization
+
+Widget 2:
+Add - Line Graph
+Plain Text - MemoryUsage
+Title - Raspberry Pi Memory Utilization
+
+Widget 3:
+Add - Line Graph
+Select - DiskUsage
+Title - Raspberry Pi Disk Utilization
+
+
+
