@@ -1,0 +1,1 @@
+I built an AWS IoT monitoring platform using a Raspberry Pi 5. The device authenticates to AWS IoT Core using X.509 certificates and publishes CPU, memory, and disk telemetry via MQTT. AWS IoT Rules automatically route the telemetry into DynamoDB for storage and later visualization.

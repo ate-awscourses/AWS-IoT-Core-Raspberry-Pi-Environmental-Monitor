@@ -1,7 +1,6 @@
-# Built an AWS IoT monitoring solution using Raspberry Pi 5, Python, MQTT, and AWS IoT Core. 
-# Implemented certificate-based device authentication and published real-time system telemetry including CPU, memory, and disk utilization to AWS.
 import json
 import time
+import psutil
 from awscrt import mqtt
 from awsiot import mqtt_connection_builder
 
@@ -23,16 +22,22 @@ mqtt_connection.connect().result()
 
 print("Connected!")
 
-message = {
-    "device": "raspberrypi5",
-    "status": "hello from raspberry pi"
-}
+while True:
+    payload = {
+        "device": "raspberrypi5",
+	"timestamp": str(int(time.time())),
+        "cpu": psutil.cpu_percent(),
+        "memory": psutil.virtual_memory().percent,
+        "disk": psutil.disk_usage("/").percent
+    }
 
-mqtt_connection.publish(
-    topic="pi/metrics",
-    payload=json.dumps(message),
-    qos=mqtt.QoS.AT_LEAST_ONCE
-)
+    mqtt_connection.publish(
+        topic="pi/metrics",
+        payload=json.dumps(payload),
+        qos=mqtt.QoS.AT_LEAST_ONCE
+    )
 
-print("Message sent!")
+    print(payload)
 
+    time.sleep(30)
+ 
